@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model calle {
+  idcalle      Int          @id
+  descripcion  String       @db.VarChar(30)
+  idUrba       Int
+  urbanizacion urbanizacion @relation(fields: [idUrba], references: [idurba], onDelete: NoAction, onUpdate: NoAction, map: "fk_idurba")
+  cliente      cliente[]
+}
+
+model categoria {
+  idcategoria Int        @id(map: "pk_categoria") @default(autoincrement())
+  deslin      String     @db.VarChar(150)
+  codlin      Int
+  producto    producto[]
+}
+
+model cliente {
+  idcliente  Int       @id(map: "pk_cliente") @default(autoincrement())
+  nombre     String    @db.VarChar(100)
+  apellido   String    @db.VarChar(100)
+  celular    String    @unique @db.VarChar(9)
+  idCalle    Int
+  numeroZona Int
+  calle      calle     @relation(fields: [idCalle], references: [idcalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_calle")
+  factura    factura[]
+}
+
+model confiSistema {
+  idconfi       Int      @id
+  numeroWsp     Int
+  horaAtenIncio DateTime @db.Timetz(6)
+  horaAtenFin   DateTime @db.Timetz(6)
+}
+
+model controlenvio {
+  idcontrol                               Int       @id(map: "pk_controlenvio") @default(autoincrement())
+  idfactura                               Int
+  fenvio                                  DateTime  @default(now()) @db.Timestamp(6)
+  estadonoti                              String    @db.VarChar(50)
+  factura_controlenvio_idfacturaTofactura factura   @relation("controlenvio_idfacturaTofactura", fields: [idfactura], references: [idfactura], onDelete: Cascade, map: "fk_controlenvio_factura")
+  factura_factura_idcontrolTocontrolenvio factura[] @relation("factura_idcontrolTocontrolenvio")
+}
+
+model detallefactura {
+  iddetallefact  Int      @id(map: "pk_detallefactura") @default(autoincrement())
+  idfactura      Int
+  idproducto     Int
+  cantidad       Int
+  preciounitario Decimal  @db.Decimal(10, 2)
+  factura        factura  @relation(fields: [idfactura], references: [idfactura], onDelete: Cascade, map: "fk_detallefactura_factura")
+  producto       producto @relation(fields: [idproducto], references: [idproducto], map: "fk_detallefactura_producto")
+}
+
+model factura {
+  idfactura                                    Int              @id(map: "pk_factura") @default(autoincrement())
+  fechahora                                    DateTime         @default(now()) @db.Timestamp(6)
+  total                                        Decimal          @db.Decimal(10, 2)
+  estadopago                                   String           @db.VarChar(50)
+  idcontrol                                    Int?
+  idpago                                       Int
+  idcliente                                    Int
+  idpromocion                                  Int?
+  fExpiracion                                  DateTime?        @default(dbgenerated("(now() + '00:10:00'::interval)")) @db.Timetz(6)
+  controlenvio_controlenvio_idfacturaTofactura controlenvio[]   @relation("controlenvio_idfacturaTofactura")
+  detallefactura                               detallefactura[]
+  cliente                                      cliente          @relation(fields: [idcliente], references: [idcliente], map: "fk_factura_cliente")
+  controlenvio_factura_idcontrolTocontrolenvio controlenvio?    @relation("factura_idcontrolTocontrolenvio", fields: [idcontrol], references: [idcontrol], map: "fk_factura_controlenvio")
+  promocampana                                 promocampana?    @relation(fields: [idpromocion], references: [idpromo], map: "fk_factura_promocampana")
+  tipopago                                     tipopago         @relation(fields: [idpago], references: [idpago], map: "fk_factura_tipopago")
+}
+
+model historialAcceso {
+  idhistorial  Int        @id
+  idTrabajador Int
+  fHora        DateTime?  @db.Timestamptz(6)
+  accion       String     @db.VarChar(30)
+  trabajador   trabajador @relation(fields: [idTrabajador], references: [idtrabajador], onDelete: NoAction, onUpdate: NoAction, map: "fk_idtrabajador")
+}
+
+model historialStock {
+  idhistorial  Int        @id
+  cantAnterior Int
+  cantNueva    Int
+  fCambio      DateTime?  @db.Timetz(6)
+  motivo       String
+  idProducto   Int
+  idTrabajador Int
+  producto     producto   @relation(fields: [idProducto], references: [idproducto], onDelete: NoAction, onUpdate: NoAction, map: "fk_idproducto")
+  trabajador   trabajador @relation(fields: [idTrabajador], references: [idtrabajador], onDelete: NoAction, onUpdate: NoAction, map: "fk_idtrabajador")
+}
+
+model medidas {
+  idmedida Int        @id
+  desmed   String     @db.VarChar(30)
+  codmed   String     @db.VarChar(30)
+  producto producto[]
+}
+
+model merma {
+  idmerma      Int        @id
+  idproducto   Int
+  idtrabajador Int
+  cantidad     Int
+  fRegistro    DateTime?  @db.Timetz(6)
+  motivo       String?
+  producto     producto   @relation(fields: [idproducto], references: [idproducto], onDelete: NoAction, onUpdate: NoAction, map: "fk_idproducto")
+  trabajador   trabajador @relation(fields: [idtrabajador], references: [idtrabajador], onDelete: NoAction, onUpdate: NoAction, map: "fk_idtrabajador")
+}
+
+model permiso {
+  idpermiso     Int          @id
+  nombrePermiso String[]     @db.VarChar(30)
+  rolPermiso    rolPermiso[]
+}
+
+model producto {
+  idproducto     Int              @id(map: "pk_producto") @default(autoincrement())
+  nomart         String           @db.VarChar(255)
+  preven         Decimal          @db.Decimal(10, 2)
+  imagenurl      String?          @db.VarChar(255)
+  stock          Int
+  activo         Boolean          @default(true)
+  idcategoria    Int
+  stockMinimo    Int              @default(10)
+  idUnidadMedida Int
+  nroart         Int
+  codbar         String?          @db.VarChar(30)
+  valcom         Decimal          @db.Decimal(10, 4)
+  precom         Decimal          @db.Decimal(10, 4)
+  fereg          DateTime         @db.Date
+  detallefactura detallefactura[]
+  historialStock historialStock[]
+  merma          merma[]
+  categoria      categoria        @relation(fields: [idcategoria], references: [idcategoria], map: "fk_producto_categoria")
+  medidas        medidas          @relation(fields: [idUnidadMedida], references: [idmedida], onDelete: NoAction, onUpdate: NoAction, map: "fk_producto_idunidadmedida")
+  reglapromo     reglapromo[]
+}
+
+model promocampana {
+  idpromo     Int          @id(map: "pk_promocampana") @default(autoincrement())
+  descripcion String       @db.VarChar(255)
+  codigourl   String       @unique @db.VarChar(150)
+  desctporcen Decimal      @db.Decimal(5, 2)
+  fincio      DateTime     @db.Timestamp(6)
+  ffin        DateTime     @db.Timestamp(6)
+  factura     factura[]
+  reglapromo  reglapromo[]
+}
+
+model reglapromo {
+  idregla      Int          @id(map: "pk_reglapromo") @default(autoincrement())
+  idpromo      Int
+  idproducto   Int
+  undrequerida Int
+  producto     producto     @relation(fields: [idproducto], references: [idproducto], map: "fk_reglapromo_producto")
+  promocampana promocampana @relation(fields: [idpromo], references: [idpromo], onDelete: Cascade, map: "fk_reglapromo_promocampana")
+}
+
+model rol {
+  idrol       Int          @id
+  nombreRol   String[]     @db.VarChar(20)
+  descripcion String?
+  rolPermiso  rolPermiso[]
+  trabajador  trabajador[]
+}
+
+model rolPermiso {
+  idrol     Int
+  idpermiso Int
+  permiso   permiso @relation(fields: [idpermiso], references: [idpermiso], onDelete: NoAction, onUpdate: NoAction, map: "fk_rolpermiso_idpermiso")
+  rol       rol     @relation(fields: [idrol], references: [idrol], onDelete: NoAction, onUpdate: NoAction, map: "fk_rolpermiso_idrol")
+
+  @@id([idrol, idpermiso])
+}
+
+model tipopago {
+  idpago      Int       @id(map: "pk_tipopago") @default(autoincrement())
+  descripcion String    @db.VarChar(100)
+  factura     factura[]
+}
+
+model trabajador {
+  idtrabajador    Int               @id(map: "pk_trabajador") @default(autoincrement())
+  username        String            @unique(map: "administrador_username_key") @db.VarChar(50)
+  password        String            @db.VarChar(255)
+  ultimoasceso    DateTime?         @db.Timestamp(6)
+  idRol           Int?
+  historialAcceso historialAcceso[]
+  historialStock  historialStock[]
+  merma           merma[]
+  rol             rol?              @relation(fields: [idRol], references: [idrol], onDelete: NoAction, onUpdate: NoAction, map: "fk_idrol")
+}
+
+model urbanizacion {
+  idurba       Int          @id
+  descripcion  String       @db.VarChar(30)
+  idZona       Int
+  calle        calle[]
+  zonaDelivery zonaDelivery @relation(fields: [idZona], references: [idzona], onDelete: NoAction, onUpdate: NoAction, map: "fk_idzona")
+}
+
+model zonaDelivery {
+  idzona       Int            @id
+  descripcion  String         @db.VarChar(30)
+  costoEnvio   Decimal        @db.Money
+  urbanizacion urbanizacion[]
+}
