@@ -7,7 +7,7 @@ const formatearProducto = (p) => ({
   title:     p.nomart,
   unit:      p.medidas?.desmed || '',
   price:     Number(p.preven).toFixed(2),
-  oldPrice:  Number(p.precom).toFixed(2),
+  oldPrice:  null,
   discount:  null,
   image:     p.imagenurl || null,
   stock:     p.stock,
@@ -90,10 +90,27 @@ const createProducto = async (req, res) => {
 };
 
 // GET /api/categorias
+// GET /api/productos/categorias
 const getCategorias = async (req, res) => {
   try {
-    const categorias = await prisma.categoria.findMany();
-    res.json(categorias);
+    const categorias = await prisma.categoria.findMany({
+      include: {
+        producto: {
+          where: { activo: true, imagenurl: { not: null } },
+          select: { imagenurl: true },
+          take: 1  // solo un producto para obtener su imagen
+        }
+      }
+    });
+
+    // Formatear para que el front reciba idcategoria, deslin e imagenurl
+    const resultado = categorias.map(cat => ({
+      idcategoria: cat.idcategoria,
+      deslin:      cat.deslin,
+      imagenurl:   cat.producto[0]?.imagenurl || null
+    }));
+
+    res.json(resultado);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al obtener las categorías" });
