@@ -7,7 +7,7 @@ const IMAGEN_POR_CATEGORIA = {
   1:  'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400', // LICORES
   2:  'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400', // BEBIDAS
   6:  'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400', // LACTEOS
-  34: 'https://images.unsplash.com/photo-1582058091597-35b4b7e7f26b?w=400', // GOLOSINAS
+  34: 'https://images.unsplash.com/photo-1581798459219-318e76aecc7b?w=400', // GOLOSINAS
   52: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400', // SNACKS
 };
 
