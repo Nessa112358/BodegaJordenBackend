@@ -151,6 +151,7 @@ model promocampana {
   desctporcen Decimal      @db.Decimal(5, 2)
   fincio      DateTime     @db.Timestamp(6)
   ffin        DateTime     @db.Timestamp(6)
+  imagenurl   String?      @db.VarChar(500)
   factura     factura[]
   reglapromo  reglapromo[]
 }

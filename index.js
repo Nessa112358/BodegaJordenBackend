@@ -6,6 +6,7 @@ const cors = require('cors');
 const productosRoutes = require('./src/routes/productos.routes');
 const facturasRoutes = require('./src/routes/facturas.routes');
 const clientesRoutes = require('./src/routes/clientes.routes');
+const promocionesRoutes = require('./src/routes/promociones.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api/productos', productosRoutes);
 app.use('/api/facturas', facturasRoutes);
 app.use('/api/clientes', clientesRoutes);
+app.use('/api/promociones', promocionesRoutes);
 
 app.get('/', (req, res) => {
   res.json({ mensaje: 'API Bodega Tito funcionando' });
