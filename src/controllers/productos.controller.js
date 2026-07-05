@@ -13,6 +13,7 @@ const formatearProducto = (p) => ({
   stock:     p.stock,
   categoria: p.categoria?.deslin || '',
   codbar:    p.codbar || null, 
+  idcategoria: p.idcategoria, 
 });
 
 // GET /api/productos
