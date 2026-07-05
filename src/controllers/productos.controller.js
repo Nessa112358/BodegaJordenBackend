@@ -12,6 +12,7 @@ const formatearProducto = (p) => ({
   image:     p.imagenurl || null,
   stock:     p.stock,
   categoria: p.categoria?.deslin || '',
+  codbar:    p.codbar || null, 
 });
 
 // GET /api/productos
