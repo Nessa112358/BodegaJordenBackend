@@ -3,7 +3,7 @@ const prisma = require('../lib/prisma');
 // Formatear producto para que el front lo entienda
 const formatearProducto = (p) => ({
   id:          p.idproducto,
-  brand:       p.marca?.descripcion || p.nomart,  
+  brand:       p.marca?.descripcion || null,  
   title:       p.nomart,
   unit:        p.medidas?.desmed || '',
   price:       Number(p.preven).toFixed(2),
