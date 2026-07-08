@@ -121,6 +121,12 @@ model permiso {
   rolPermiso    rolPermiso[]
 }
 
+model marca {
+  idmarca     Int        @id @default(autoincrement())
+  descripcion String     @db.VarChar(150)
+  producto    producto[]
+}
+
 model producto {
   idproducto     Int              @id(map: "pk_producto") @default(autoincrement())
   nomart         String           @db.VarChar(255)
@@ -136,12 +142,14 @@ model producto {
   valcom         Decimal          @db.Decimal(10, 4)
   precom         Decimal          @db.Decimal(10, 4)
   fereg          DateTime         @db.Date
+  idMarca        Int?
   detallefactura detallefactura[]
   historialStock historialStock[]
   merma          merma[]
   categoria      categoria        @relation(fields: [idcategoria], references: [idcategoria], map: "fk_producto_categoria")
   medidas        medidas          @relation(fields: [idUnidadMedida], references: [idmedida], onDelete: NoAction, onUpdate: NoAction, map: "fk_producto_idunidadmedida")
   reglapromo     reglapromo[]
+  marca          marca?           @relation(fields: [idMarca], references: [idmarca], map: "fk_producto_marca")
 }
 
 model promocampana {

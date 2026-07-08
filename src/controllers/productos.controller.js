@@ -2,26 +2,27 @@ const prisma = require('../lib/prisma');
 
 // Formatear producto para que el front lo entienda
 const formatearProducto = (p) => ({
-  id:        p.idproducto,
-  brand:     p.nomart,
-  title:     p.nomart,
-  unit:      p.medidas?.desmed || '',
-  price:     Number(p.preven).toFixed(2),
-  oldPrice:  null,
-  discount:  null,
-  image:     p.imagenurl || null,
-  stock:     p.stock,
-  categoria: p.categoria?.deslin || '',
-  codbar:    p.codbar || null, 
-  idcategoria: p.idcategoria, 
+  id:          p.idproducto,
+  brand:       p.marca?.descripcion || p.nomart,  
+  title:       p.nomart,
+  unit:        p.medidas?.desmed || '',
+  price:       Number(p.preven).toFixed(2),
+  oldPrice:    null,
+  discount:    null,
+  image:       p.imagenurl || null,
+  stock:       p.stock,
+  categoria:   p.categoria?.deslin || '',
+  codbar:      p.codbar || null,
+  idcategoria: p.idcategoria,
+  idmarca:     p.idMarca || null,
+  marca:       p.marca?.descripcion || null,
 });
-
 // GET /api/productos
 const getProductos = async (req, res) => {
   try {
     const productos = await prisma.producto.findMany({
       where: { activo: true },
-      include: { categoria: true, medidas: true }
+      include: { categoria: true, medidas: true, marca: true }
     });
     res.json(productos.map(formatearProducto));
   } catch (error) {
@@ -119,10 +120,27 @@ const getCategorias = async (req, res) => {
   }
 };
 
+//obtener productos por marca
+
+const getProductosByMarca = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const productos = await prisma.producto.findMany({
+      where: { activo: true, idMarca: parseInt(id) },
+      include: { categoria: true, medidas: true, marca: true }
+    });
+    res.json(productos.map(formatearProducto));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener productos por marca" });
+  }
+};
+
 module.exports = {
   getProductos,
   getProductoById,
   getProductosByCategoria,
   createProducto,
   getCategorias,
+  getProductosByMarca,
 };
