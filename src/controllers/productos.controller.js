@@ -37,7 +37,7 @@ const getProductoById = async (req, res) => {
     const { id } = req.params;
     const producto = await prisma.producto.findUnique({
       where: { idproducto: parseInt(id) },
-      include: { categoria: true, medidas: true }
+      include: { categoria: true, medidas: true, marca: true }
     });
 
     if (!producto) {
@@ -57,7 +57,7 @@ const getProductosByCategoria = async (req, res) => {
     const { id } = req.params;
     const productos = await prisma.producto.findMany({
       where: { activo: true, idcategoria: parseInt(id) },
-      include: { categoria: true, medidas: true }
+      include: { categoria: true, medidas: true, marca: true }
     });
     res.json(productos.map(formatearProducto));
   } catch (error) {
