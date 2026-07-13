@@ -6,8 +6,8 @@ const getPromociones = async (req, res) => {
     const ahora = new Date();
     const promociones = await prisma.promocampana.findMany({
       where: {
-        fincio: { lte: ahora },  // ya empezó
-        ffin:   { gte: ahora },  // aún no termina
+        fincio: { lte: ahora },
+        ffin:   { gte: ahora },
       }
     });
     res.json(promociones);
@@ -17,11 +17,12 @@ const getPromociones = async (req, res) => {
   }
 };
 
-// GET /api/promociones/banners — solo promociones con imagen (para el carrusel)
+// GET /api/promociones/banners — promociones + combos para el carrusel
 const getBanners = async (req, res) => {
   try {
     const ahora = new Date();
-    const banners = await prisma.promocampana.findMany({
+
+    const promociones = await prisma.promocampana.findMany({
       where: {
         fincio:    { lte: ahora },
         ffin:      { gte: ahora },
@@ -35,6 +36,37 @@ const getBanners = async (req, res) => {
         codigourl:   true,
       }
     });
+
+    const combos = await prisma.producto.findMany({
+      where: {
+        activo:    true,
+        imagenurl: { not: null },
+        marca:     { descripcion: 'COMBO' }
+      },
+      select: {
+        idproducto: true,
+        nomart:     true,
+        imagenurl:  true,
+        preven:     true,
+      },
+      take: 10
+    });
+
+    const combosFormateados = combos.map(c => ({
+      idpromo:     `combo-${c.idproducto}`,
+      descripcion: c.nomart,
+      imagenurl:   c.imagenurl,
+      desctporcen: null,
+      codigourl:   null,
+      precio:      Number(c.preven).toFixed(2),
+      tipo:        'combo'
+    }));
+
+    const banners = [
+      ...promociones.map(p => ({ ...p, tipo: 'promo' })),
+      ...combosFormateados
+    ];
+
     res.json(banners);
   } catch (error) {
     console.error(error);
@@ -42,7 +74,7 @@ const getBanners = async (req, res) => {
   }
 };
 
-// POST /api/promociones — crear una promoción nueva
+// POST /api/promociones — crear promoción
 const createPromocion = async (req, res) => {
   try {
     const { descripcion, codigourl, desctporcen, fincio, ffin, imagenurl } = req.body;

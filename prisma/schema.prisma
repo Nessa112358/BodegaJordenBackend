@@ -23,13 +23,14 @@ model categoria {
 }
 
 model cliente {
-  idcliente  Int       @id(map: "pk_cliente") @default(autoincrement())
+  idcliente  Int       @id @default(autoincrement())
   nombre     String    @db.VarChar(100)
   apellido   String    @db.VarChar(100)
   celular    String    @unique @db.VarChar(9)
-  idCalle    Int
-  numeroZona Int
-  calle      calle     @relation(fields: [idCalle], references: [idcalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_calle")
+  direccion  String?   @db.VarChar(255)
+  idCalle    Int?
+  numeroZona Int?
+  calle      calle?    @relation(fields: [idCalle], references: [idcalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_cliente_calle")
   factura    factura[]
 }
 

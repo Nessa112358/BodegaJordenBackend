@@ -136,6 +136,25 @@ const getProductosByMarca = async (req, res) => {
   }
 };
 
+// GET /api/productos/combos
+const getCombos = async (req, res) => {
+  try {
+    const combos = await prisma.producto.findMany({
+      where: {
+        activo: true,
+        marca: {
+          descripcion: 'COMBO'
+        }
+      },
+      include: { categoria: true, medidas: true, marca: true }
+    });
+    res.json(combos.map(formatearProducto));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los combos" });
+  }
+};
+
 module.exports = {
   getProductos,
   getProductoById,
@@ -143,4 +162,5 @@ module.exports = {
   createProducto,
   getCategorias,
   getProductosByMarca,
+  getCombos
 };

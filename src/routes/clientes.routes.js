@@ -1,8 +1,9 @@
 const { Router } = require('express');
-const { getClientes } = require('../controllers/clientes.controller');
+const { getClienteByCelular, upsertCliente } = require('../controllers/clientes.controller');
 
 const router = Router();
 
-router.get('/', getClientes);
+router.get('/:celular', getClienteByCelular);
+router.post('/', upsertCliente);
 
 module.exports = router;
