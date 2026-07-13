@@ -27,6 +27,8 @@ model cliente {
   nombre     String    @db.VarChar(100)
   apellido   String    @db.VarChar(100)
   celular    String    @unique @db.VarChar(9)
+  email      String?   @unique @db.VarChar(150)
+  password   String?   @db.VarChar(255)
   direccion  String?   @db.VarChar(255)
   idCalle    Int?
   numeroZona Int?
@@ -132,7 +134,7 @@ model producto {
   idproducto     Int              @id(map: "pk_producto") @default(autoincrement())
   nomart         String           @db.VarChar(255)
   preven         Decimal          @db.Decimal(10, 2)
-  imagenurl      String?          @db.VarChar(255)
+  imagenurl      String?          @db.Text
   stock          Int
   activo         Boolean          @default(true)
   idcategoria    Int

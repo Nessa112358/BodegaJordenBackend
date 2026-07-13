@@ -54,7 +54,7 @@ const getBanners = async (req, res) => {
 
     const combosFormateados = combos.map(c => ({
       idpromo:     `combo-${c.idproducto}`,
-      descripcion: c.nomart,
+      // descripcion: c.nomart,
       imagenurl:   c.imagenurl,
       desctporcen: null,
       codigourl:   null,
