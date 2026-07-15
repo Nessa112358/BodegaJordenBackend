@@ -7,5 +7,6 @@ router.post('/login', loginCliente);
 router.post('/register', registerCliente);
 router.post('/', upsertCliente);
 router.get('/:celular', getClienteByCelular);
+router.post('/sync-google', syncGoogleCliente);
 
 module.exports = router;

@@ -1,6 +1,36 @@
 const prisma = require('../lib/prisma');
 const bcrypt = require('bcryptjs');
 
+// POST /api/clientes/sync-google
+const syncGoogleCliente = async (req, res) => {
+  try {
+    const { email, nombre, apellido } = req.body;
+
+    if (!email) return res.status(400).json({ error: 'Email requerido' });
+
+    // Buscar si ya existe
+    let cliente = await prisma.cliente.findUnique({ where: { email } });
+
+    if (!cliente) {
+      // Crear cliente nuevo desde Google
+      cliente = await prisma.cliente.create({
+        data: {
+          nombre:   nombre || email.split('@')[0],
+          apellido: apellido || '',
+          celular:  `google_${Date.now()}`, // temporal hasta que complete su perfil
+          email,
+        }
+      });
+    }
+
+    const { password: _, ...clienteSinPassword } = cliente;
+    res.json(clienteSinPassword);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al sincronizar cliente' });
+  }
+};
+
 // Verificar cliente por celular (para checkout)
 const getClienteByCelular = async (req, res) => {
   try {
@@ -26,6 +56,20 @@ const registerCliente = async (req, res) => {
     if (!nombre || !celular || !email || !password) {
       return res.status(400).json({ error: "Nombre, celular, email y contraseña son obligatorios" });
     }
+
+    // Validar que sea Gmail
+    if (!email.endsWith('@gmail.com')) {
+      return res.status(400).json({ error: "Solo se aceptan correos Gmail (@gmail.com)" });
+    }
+
+    // Validar contraseña fuerte
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!regexPassword.test(password)) {
+      return res.status(400).json({ 
+        error: "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo" 
+      });
+    }
+
     if (celular.length !== 9) {
       return res.status(400).json({ error: "El celular debe tener 9 dígitos" });
     }
@@ -64,6 +108,8 @@ const registerCliente = async (req, res) => {
     res.status(500).json({ error: "Error al registrar cliente" });
   }
 };
+
+
 
 // Login de cliente
 const loginCliente = async (req, res) => {
@@ -119,4 +165,4 @@ const upsertCliente = async (req, res) => {
   }
 };
 
-module.exports = { getClienteByCelular, registerCliente, loginCliente, upsertCliente };
+module.exports = { getClienteByCelular, registerCliente, loginCliente, upsertCliente, syncGoogleCliente   };
