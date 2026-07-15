@@ -127,7 +127,7 @@ model producto {
   activo         Boolean          @default(true)
   idcategoria    Int
   stockMinimo    Int              @default(10)
-  idUnidadMedida Int
+  idUnidadMedida BigInt
   nroart         Int
   codbar         String?          @db.VarChar(30)
   valcom         Decimal          @db.Decimal(10, 4)
@@ -139,6 +139,7 @@ model producto {
   merma          merma[]
   categoria      categoria        @relation(fields: [idcategoria], references: [idcategoria], map: "fk_producto_categoria")
   marca          marca?           @relation(fields: [idMarca], references: [idmarca], map: "fk_producto_marca")
+  medidas        medidas          @relation(fields: [idUnidadMedida], references: [idmedida], onDelete: NoAction, onUpdate: NoAction)
   reglapromo     reglapromo[]
 }
 
@@ -205,7 +206,8 @@ model zonaDelivery {
 }
 
 model medidas {
-  idmedida BigInt  @id(map: "medidas_pkey1") @default(autoincrement())
-  desmed   String  @db.VarChar
-  codmed   String?
+  codmed   BigInt     @default(autoincrement())
+  desmed   String     @db.VarChar
+  idmedida BigInt     @id
+  producto producto[]
 }
