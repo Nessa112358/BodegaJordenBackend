@@ -7,6 +7,7 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
 model calle {
   idcalle      Int          @id
   descripcion  String       @db.VarChar(30)
@@ -18,7 +19,7 @@ model calle {
 model categoria {
   idcategoria Int        @id(map: "pk_categoria") @default(autoincrement())
   deslin      String     @db.VarChar(150)
-  codlin      Int
+  codlin      String?    @db.VarChar
   producto    producto[]
 }
 
@@ -100,13 +101,6 @@ model historialStock {
   trabajador   trabajador @relation(fields: [idTrabajador], references: [idtrabajador], onDelete: NoAction, onUpdate: NoAction, map: "fk_idtrabajador")
 }
 
-model medidas {
-  idmedida Int        @id
-  desmed   String     @db.VarChar(30)
-  codmed   String     @db.VarChar(30)
-  producto producto[]
-}
-
 model merma {
   idmerma      Int        @id
   idproducto   Int
@@ -116,12 +110,6 @@ model merma {
   motivo       String?
   producto     producto   @relation(fields: [idproducto], references: [idproducto], onDelete: NoAction, onUpdate: NoAction, map: "fk_idproducto")
   trabajador   trabajador @relation(fields: [idtrabajador], references: [idtrabajador], onDelete: NoAction, onUpdate: NoAction, map: "fk_idtrabajador")
-}
-
-model permiso {
-  idpermiso     Int          @id
-  nombrePermiso String[]     @db.VarChar(30)
-  rolPermiso    rolPermiso[]
 }
 
 model marca {
@@ -134,7 +122,7 @@ model producto {
   idproducto     Int              @id(map: "pk_producto") @default(autoincrement())
   nomart         String           @db.VarChar(255)
   preven         Decimal          @db.Decimal(10, 2)
-  imagenurl      String?          @db.Text
+  imagenurl      String?
   stock          Int
   activo         Boolean          @default(true)
   idcategoria    Int
@@ -150,9 +138,8 @@ model producto {
   historialStock historialStock[]
   merma          merma[]
   categoria      categoria        @relation(fields: [idcategoria], references: [idcategoria], map: "fk_producto_categoria")
-  medidas        medidas          @relation(fields: [idUnidadMedida], references: [idmedida], onDelete: NoAction, onUpdate: NoAction, map: "fk_producto_idunidadmedida")
-  reglapromo     reglapromo[]
   marca          marca?           @relation(fields: [idMarca], references: [idmarca], map: "fk_producto_marca")
+  reglapromo     reglapromo[]
 }
 
 model promocampana {
@@ -180,17 +167,7 @@ model rol {
   idrol       Int          @id
   nombreRol   String[]     @db.VarChar(20)
   descripcion String?
-  rolPermiso  rolPermiso[]
   trabajador  trabajador[]
-}
-
-model rolPermiso {
-  idrol     Int
-  idpermiso Int
-  permiso   permiso @relation(fields: [idpermiso], references: [idpermiso], onDelete: NoAction, onUpdate: NoAction, map: "fk_rolpermiso_idpermiso")
-  rol       rol     @relation(fields: [idrol], references: [idrol], onDelete: NoAction, onUpdate: NoAction, map: "fk_rolpermiso_idrol")
-
-  @@id([idrol, idpermiso])
 }
 
 model tipopago {
@@ -201,10 +178,11 @@ model tipopago {
 
 model trabajador {
   idtrabajador    Int               @id(map: "pk_trabajador") @default(autoincrement())
-  username        String            @unique(map: "administrador_username_key") @db.VarChar(50)
+  nombre          String            @unique(map: "administrador_username_key") @db.VarChar(50)
   password        String            @db.VarChar(255)
   ultimoasceso    DateTime?         @db.Timestamp(6)
   idRol           Int?
+  correo          String            @unique @db.VarChar
   historialAcceso historialAcceso[]
   historialStock  historialStock[]
   merma           merma[]
@@ -224,4 +202,10 @@ model zonaDelivery {
   descripcion  String         @db.VarChar(30)
   costoEnvio   Decimal        @db.Money
   urbanizacion urbanizacion[]
+}
+
+model medidas {
+  idmedida BigInt  @id(map: "medidas_pkey1") @default(autoincrement())
+  desmed   String  @db.VarChar
+  codmed   String?
 }
