@@ -4,30 +4,27 @@ const bcrypt = require('bcryptjs');
 // POST /api/clientes/sync-google
 const syncGoogleCliente = async (req, res) => {
   try {
-    const { email, nombre, apellido } = req.body;
+    const { email, nombre } = req.body;
 
     if (!email) return res.status(400).json({ error: 'Email requerido' });
 
-    // Buscar si ya existe
-    let cliente = await prisma.cliente.findUnique({ where: { email } });
+    // Buscar si ya existe en tu BD
+    const cliente = await prisma.cliente.findUnique({ where: { email } });
 
     if (!cliente) {
-      // Crear cliente nuevo desde Google
-      cliente = await prisma.cliente.create({
-        data: {
-          nombre:   nombre || email.split('@')[0],
-          apellido: apellido || '',
-          celular:  `google_${Date.now()}`, // temporal hasta que complete su perfil
-          email,
-        }
+      // No existe → no permitir ingreso
+      return res.status(404).json({ 
+        error: 'No tienes una cuenta registrada. Por favor regístrate primero.' 
       });
     }
 
+    // Existe → devolver datos
     const { password: _, ...clienteSinPassword } = cliente;
     res.json(clienteSinPassword);
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al sincronizar cliente' });
+    res.status(500).json({ error: 'Error al verificar cliente' });
   }
 };
 
