@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 // Importar rutas
+const { verificarToken, soloAdmin } = require('./src/middlewares/auth.middleware');
 const productosRoutes = require('./src/routes/productos.routes');
 const facturasRoutes = require('./src/routes/facturas.routes');
 const clientesRoutes = require('./src/routes/clientes.routes');
@@ -19,6 +20,17 @@ app.use(express.json());
 // ═══════════════════════════════════════
 //  RUTAS
 // ═══════════════════════════════════════
+// Rutas públicas (sin autenticación)
+app.use('/api/productos', productosRoutes);
+app.use('/api/promociones', promocionesRoutes);
+
+// Rutas que requieren login de cliente
+app.use('/api/clientes', verificarToken, clientesRoutes);
+app.use('/api/facturas', verificarToken, facturasRoutes);
+
+// Rutas solo para admin
+app.use('/api/admin', soloAdmin, adminRoutes);
+
 app.use('/api/productos', productosRoutes);
 app.use('/api/facturas', facturasRoutes);
 app.use('/api/clientes', clientesRoutes);
